@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Market Pulse</title>
+<meta name="description" content="Live stocks, indices, gold, silver, currency and crypto with your personal watchlist.">
+<meta name="theme-color" content="#0b0f17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Markets">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<script src="config.js"></script>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--up:#059669;--down:#dc2626;--accent:#2563eb;--chip:#e9eef5;--gold:#b7791f;--shadow:0 1px 2px rgba(15,23,42,.06),0 1px 1px rgba(15,23,42,.04)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b0f17;--card:#121826;--card2:#0f1521;--text:#e5e7eb;--muted:#94a3b8;--line:#1e293b;--up:#22c55e;--down:#f87171;--accent:#60a5fa;--chip:#1a2335;--gold:#facc15;--shadow:none}}
+:root[data-theme=dark]{--bg:#0b0f17;--card:#121826;--card2:#0f1521;--text:#e5e7eb;--muted:#94a3b8;--line:#1e293b;--up:#22c55e;--down:#f87171;--accent:#60a5fa;--chip:#1a2335;--gold:#facc15;--shadow:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body.noscroll{overflow:hidden}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.muted{color:var(--muted)}
+.up{color:var(--up)}.down{color:var(--down)}
+.top{position:sticky;top:0;z-index:20;background:var(--bg);padding-top:env(safe-area-inset-top);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 16px 8px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
+.brand{font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.brand img{width:26px;height:26px;border-radius:7px}
+.actions{margin-left:auto;display:flex;align-items:center;gap:6px}
+.actions #upd{font-size:12px;margin-right:4px}
+.ib{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:17px;padding:0}
+.ib.spin span{display:inline-block;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.search{position:relative;flex:1 1 320px;order:3;min-width:0}
+@media(min-width:760px){.search{order:0;max-width:460px}}
+.search input{width:100%;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);padding:0 14px 0 36px;outline:none;font-size:16px}
+.search input:focus{border-color:var(--accent)}
+.search .si{position:absolute;left:12px;top:10px;color:var(--muted);pointer-events:none}
+.results{position:absolute;left:0;right:0;top:46px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);max-height:65vh;overflow:auto;z-index:30}
+.ri{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.ri:last-child{border-bottom:0}
+.ri:hover{background:var(--card2)}
+.ri>div{flex:1;min-width:0}
+.ri b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.ri small{color:var(--muted)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 16px 10px;max-width:1100px;margin:0 auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:0;background:var(--chip);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;color:var(--muted)}
+.tab.on{background:var(--text);color:var(--bg)}
+.cnt{font-size:11px;opacity:.75}
+main{max-width:1100px;margin:0 auto;padding:12px 16px 24px}
+.banner{max-width:1100px;margin:10px auto 0;padding:10px 14px;border-radius:10px;background:#fef3c7;color:#78350f;font-size:13px;width:calc(100% - 32px)}
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.row{display:grid;grid-template-columns:34px minmax(0,1fr) 92px 112px 92px;align-items:center;gap:8px;padding:11px 12px 11px 6px;border-bottom:1px solid var(--line);cursor:pointer}
+.row:last-child{border-bottom:0}
+.row:not(.head):hover{background:var(--card2)}
+.row.head{cursor:default;font-size:12px;color:var(--muted);padding-top:8px;padding-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+.nm{min-width:0}
+.nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm small{color:var(--muted);font-size:12px;white-space:nowrap}
+.live{color:var(--up);font-style:normal;font-size:9px;vertical-align:1px}
+.hold{font-size:12px;color:var(--muted);margin-top:2px;white-space:normal}
+.px{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ch{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;font-size:14px;line-height:1.25;white-space:nowrap}
+.ch small{display:block;font-size:12px}
+.sp svg{display:block}
+.star{border:0;background:none;font-size:20px;line-height:1;color:var(--muted);padding:6px;border-radius:8px}
+.star.on{color:#f59e0b}
+@media(max-width:600px){.row{grid-template-columns:30px minmax(0,1fr) auto 78px;padding-right:10px}.row .sp{display:none}.row.head .sp{display:none}.px{font-size:15px}}
+.skel{display:inline-block;width:64px;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--chip),var(--line),var(--chip));background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+.toolbar .grow{flex:1}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 12px;font-weight:600;font-size:13px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sm{padding:5px 10px;font-size:12px}
+select.btn{padding-right:8px}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:32px 18px;text-align:center;color:var(--muted);line-height:1.7}
+.sumcard{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);cursor:pointer;min-width:0}
+.card small{display:block;color:var(--muted);font-size:12px}
+.card b{display:block;font-size:20px;margin:3px 0 1px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .gold{color:var(--gold)}
+.card span{font-size:13px;font-weight:600}
+.note{font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.6}
+.note a,.about a{color:var(--accent)}
+.note input[type=number]{width:58px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+.sec-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:16px 2px 8px;font-weight:600}
+footer{max-width:1100px;margin:0 auto;padding:8px 16px calc(24px + env(safe-area-inset-bottom));font-size:12px;color:var(--muted);text-align:center}
+/* detail sheet */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(2,6,23,.55);display:flex;justify-content:center;align-items:flex-start;overflow:auto;padding:24px 12px}
+.modal[hidden]{display:none}
+.sheet{background:var(--bg);width:100%;max-width:880px;border-radius:18px;padding:16px 16px 28px;border:1px solid var(--line)}
+@media(max-width:700px){.modal{padding:0}.sheet{border-radius:0;min-height:100%;border:0;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:calc(28px + env(safe-area-inset-bottom))}}
+.dtop{display:flex;align-items:flex-start;gap:10px}
+.dhead{flex:1;min-width:0}
+.dhead h2{margin:0;font-size:20px;line-height:1.25}
+.dhead .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.big{font-size:30px;font-weight:700;margin-top:8px;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.big .ch{font-size:16px;text-align:left}
+.dmeta{font-size:12px;color:var(--muted);margin-top:2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--chip);font-size:11px;font-weight:700}
+.pill.open{background:rgba(34,197,94,.15);color:var(--up)}
+.ranges{display:flex;gap:4px;margin:14px 0 6px;overflow-x:auto;align-items:center}
+.ranges button{border:0;background:none;padding:6px 10px;border-radius:8px;font-weight:600;font-size:13px;color:var(--muted)}
+.ranges button.on{background:var(--chip);color:var(--text)}
+.ranges .pchg{margin-left:auto;font-size:13px;font-weight:600;white-space:nowrap;padding-left:8px}
+.chart{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;min-height:262px;touch-action:pan-y;user-select:none}
+.chart svg{display:block}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .axis{fill:var(--muted);font-size:11px}
+.chart .cross{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.tip{position:absolute;top:8px;background:var(--text);color:var(--bg);padding:5px 9px;border-radius:8px;font-size:12px;pointer-events:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+.loading{padding:30px 16px;text-align:center;color:var(--muted);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:12px}
+.stat{background:var(--card);padding:10px 12px;min-width:0}
+.stat small{display:block;color:var(--muted);font-size:12px}
+.stat b{font-weight:600;font-variant-numeric:tabular-nums;font-size:14px;overflow-wrap:anywhere}
+.rbar{height:4px;background:var(--chip);border-radius:2px;position:relative;margin-top:6px}
+.rbar i{position:absolute;top:-3px;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-left:-5px}
+.holdbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:12px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.holdbox label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.holdbox input{width:130px;height:36px;border:1px solid var(--line);border-radius:9px;background:var(--bg);padding:0 10px;font-size:16px}
+.holdbox .calc{font-size:13px;flex-basis:100%}
+section{margin-top:20px}
+section h3{font-size:16px;margin:0}
+.sechead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.sechead>div{display:flex;gap:6px}
+.hist{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:auto;max-height:440px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{position:sticky;top:0;background:var(--card2);color:var(--muted);font-weight:600;font-size:12px;z-index:1}
+th:first-child,td:first-child{text-align:left}
+.fund h4{margin:14px 2px 6px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.about{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.6}
+.about summary{cursor:pointer;color:var(--accent);font-weight:600;margin-top:6px}
+.news a{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;color:inherit;text-decoration:none}
+.news a:hover{border-color:var(--accent)}
+.news small{color:var(--muted)}
+.x{flex:0 0 auto}
+.setup{max-width:560px;margin:30px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;line-height:1.6}
+.setup input{width:100%;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:0 12px;margin:8px 0 12px;font-size:16px}
+.setup code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:13px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand"><img src="icon.svg" alt=""> Market Pulse</div>
+    <div class="search">
+      <span class="si">⌕</span>
+      <input id="q" type="search" placeholder="Search stock, ETF, index… e.g. Tata, Infosys, AAPL" autocomplete="off" enterkeyhint="search" aria-label="Search">
+      <div id="results" class="results" hidden></div>
+    </div>
+    <div class="actions">
+      <span id="upd" class="muted"></span>
+      <button id="refresh" class="ib" title="Refresh" aria-label="Refresh"><span>⟳</span></button>
+      <button id="theme" class="ib" title="Theme" aria-label="Toggle theme">◐</button>
+      <button id="settings" class="ib" title="Settings" aria-label="Settings">⚙</button>
+    </div>
+  </div>
+  <nav id="tabs" class="tabs" aria-label="Categories"></nav>
+</header>
+<div id="banner" class="banner" hidden></div>
+<main id="view"></main>
+<footer>Data from Yahoo Finance; exchange prices may be delayed up to 15 min. India gold/silver rates from GoodReturns.in (indicative). Not investment advice.</footer>
+<div id="modal" class="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<input id="importFile" type="file" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+/* ================= helpers ================= */
+const $ = (s, e = document) => e.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const API = () => (LS.get('mp.api', '') || window.MP_API || '').replace(/\/+$/, '');
+
+/* ================= catalogue ================= */
+const NAMES = {
+  '^NSEI': 'Nifty 50', '^BSESN': 'Sensex', '^NSEBANK': 'Nifty Bank', '^CNXIT': 'Nifty IT', '^NSMIDCP': 'Nifty Next 50', '^CNXAUTO': 'Nifty Auto',
+  '^CNXPHARMA': 'Nifty Pharma', '^CNXFMCG': 'Nifty FMCG', '^INDIAVIX': 'India VIX',
+  '^GSPC': 'S&P 500', '^IXIC': 'Nasdaq Composite', '^DJI': 'Dow Jones', '^FTSE': 'FTSE 100', '^N225': 'Nikkei 225', '^HSI': 'Hang Seng', '^GDAXI': 'DAX',
+  'GC=F': 'Gold (USD / troy oz)', 'SI=F': 'Silver (USD / troy oz)', 'PL=F': 'Platinum (USD / oz)', 'PA=F': 'Palladium (USD / oz)',
+  'GOLDBEES.NS': 'Nippon Gold BeES ETF', 'SILVERBEES.NS': 'Nippon Silver BeES ETF',
+  'CL=F': 'Crude Oil WTI (USD / bbl)', 'BZ=F': 'Brent Crude (USD / bbl)', 'NG=F': 'Natural Gas (USD / MMBtu)', 'HG=F': 'Copper (USD / lb)', 'ALI=F': 'Aluminium (USD / t)',
+  'ZW=F': 'Wheat (USc / bu)', 'ZC=F': 'Corn (USc / bu)', 'KC=F': 'Coffee (USc / lb)', 'SB=F': 'Sugar (USc / lb)', 'CT=F': 'Cotton (USc / lb)',
+  'USDINR=X': 'US Dollar → INR', 'EURINR=X': 'Euro → INR', 'GBPINR=X': 'British Pound → INR', 'JPYINR=X': 'Japanese Yen → INR', 'AEDINR=X': 'UAE Dirham → INR',
+  'SGDINR=X': 'Singapore Dollar → INR', 'AUDINR=X': 'Australian Dollar → INR', 'CADINR=X': 'Canadian Dollar → INR', 'CHFINR=X': 'Swiss Franc → INR', 'EURUSD=X': 'Euro → USD', 'DX-Y.NYB': 'US Dollar Index',
+  'BTC-INR': 'Bitcoin', 'ETH-INR': 'Ethereum', 'SOL-INR': 'Solana', 'XRP-INR': 'XRP', 'BNB-INR': 'BNB', 'DOGE-INR': 'Dogecoin', 'ADA-INR': 'Cardano', 'USDT-INR': 'Tether', 'BTC-USD': 'Bitcoin (USD)', 'ETH-USD': 'Ethereum (USD)',
+};
+const TABS = [
+  { id: 'watch', label: '★ Watchlist' },
+  { id: 'indices', label: 'Indices', groups: [
+    ['India', ['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^CNXAUTO', '^CNXPHARMA', '^CNXFMCG', '^INDIAVIX']],
+    ['World', ['^GSPC', '^IXIC', '^DJI', '^FTSE', '^GDAXI', '^N225', '^HSI']]] },
+  { id: 'india', label: 'Indian Stocks', groups: [['Nifty heavyweights', ['RELIANCE.NS', 'HDFCBANK.NS', 'TCS.NS', 'BHARTIARTL.NS', 'ICICIBANK.NS', 'SBIN.NS', 'INFY.NS', 'HINDUNILVR.NS', 'ITC.NS', 'LT.NS', 'BAJFINANCE.NS', 'KOTAKBANK.NS', 'AXISBANK.NS', 'MARUTI.NS', 'M&M.NS', 'SUNPHARMA.NS', 'HCLTECH.NS', 'TITAN.NS', 'ULTRACEMCO.NS', 'NTPC.NS', 'ASIANPAINT.NS', 'EICHERMOT.NS', 'WIPRO.NS', 'ADANIENT.NS']]] },
+  { id: 'global', label: 'Global Stocks', groups: [['US mega caps', ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'BRK-B', 'JPM', 'NFLX', 'AMD']]] },
+  { id: 'gold', label: 'Gold & Silver', groups: [['International market & ETFs (live)', ['GC=F', 'SI=F', 'PL=F', 'PA=F', 'GOLDBEES.NS', 'SILVERBEES.NS', 'USDINR=X']]] },
+  { id: 'commod', label: 'Commodities', groups: [['Energy', ['CL=F', 'BZ=F', 'NG=F']], ['Metals', ['HG=F', 'ALI=F']], ['Agri', ['ZW=F', 'ZC=F', 'KC=F', 'SB=F', 'CT=F']]] },
+  { id: 'fx', label: 'Currency', groups: [['Rupee rates', ['USDINR=X', 'EURINR=X', 'GBPINR=X', 'AEDINR=X', 'CHFINR=X', 'SGDINR=X', 'AUDINR=X', 'CADINR=X', 'JPYINR=X']], ['Global', ['EURUSD=X', 'DX-Y.NYB']]] },
+  { id: 'crypto', label: 'Crypto', groups: [['In rupees', ['BTC-INR', 'ETH-INR', 'SOL-INR', 'XRP-INR', 'BNB-INR', 'DOGE-INR', 'ADA-INR', 'USDT-INR']], ['In dollars', ['BTC-USD', 'ETH-USD']]] },
+];
+const RANGES = [['1d', '1D'], ['5d', '5D'], ['1mo', '1M'], ['6mo', '6M'], ['ytd', 'YTD'], ['1y', '1Y'], ['5y', '5Y'], ['max', 'Max']];
+const GOLD_CORE = ['GC=F', 'SI=F', 'USDINR=X'];
+const OZ = 31.1034768;
+
+/* ================= state ================= */
+const S = {
+  tab: LS.get('mp.tab', 'watch'),
+  watch: LS.get('mp.watch', null),
+  q: LS.get('mp.q', {}),
+  err: {},
+  set: Object.assign({ duty: 6, gst: true }, LS.get('mp.set', {})),
+  sort: LS.get('mp.sort', 'mine'),
+  updated: LS.get('mp.upd', 0),
+  detail: null,
+  metals: LS.get('mp.metals', null),
+  metalsAt: 0,
+  metalsErr: '',
+};
+async function loadMetals(force) {
+  if (!force && S.metalsAt && Date.now() - S.metalsAt < 10 * 60e3) return;
+  try {
+    S.metals = await api('/api/metals-in');
+    S.metalsAt = Date.now(); S.metalsErr = '';
+    LS.set('mp.metals', S.metals);
+  } catch (e) { S.metalsErr = e.message; }
+}
+if (!Array.isArray(S.watch)) S.watch = ['^NSEI', '^BSESN', 'RELIANCE.NS', 'HDFCBANK.NS', 'TCS.NS', 'GC=F'].map(s => ({ s }));
+S.watch = S.watch.filter(w => w && typeof w.s === 'string');
+if (!TABS.some(t => t.id === S.tab)) S.tab = 'watch';
+const saveWatch = () => LS.set('mp.watch', S.watch);
+const inWatch = s => S.watch.some(w => w.s === s);
+const wEntry = s => S.watch.find(w => w.s === s);
+const nameOf = s => NAMES[s] || S.q[s]?.name || wEntry(s)?.n || s;
+
+/* ================= formatting ================= */
+const NF = {};
+function num(v, d = 2, cur) {
+  if (v == null || !isFinite(v)) return '—';
+  const k = (cur === 'INR' ? 'in' : 'us') + d;
+  NF[k] = NF[k] || new Intl.NumberFormat(cur === 'INR' ? 'en-IN' : 'en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  return NF[k].format(v);
+}
+const CS = { INR: '₹', USD: '$', EUR: '€', GBP: '£', JPY: '¥' };
+const dec = v => (v != null && Math.abs(v) < 1 && v !== 0 ? 4 : 2);
+const csym = (cur, type) => (type === 'INDEX' ? '' : CS[cur] || '');
+const money = (v, cur, type) => (v == null || !isFinite(v) ? '—' : (v < 0 ? '−' : '') + csym(cur, type) + num(Math.abs(v), dec(v), cur));
+const sign = v => (v > 0 ? '+' : v < 0 ? '−' : '');
+const cls = v => (v > 0 ? 'up' : v < 0 ? 'down' : '');
+function big(v, cur, noSym) {
+  if (v == null || !isFinite(v)) return '—';
+  const a = Math.abs(v), s = v < 0 ? '−' : '', p = noSym ? '' : CS[cur] || '';
+  if (cur === 'INR') {
+    if (a >= 1e12) return s + p + num(a / 1e12, 2) + ' L Cr';
+    if (a >= 1e7) return s + p + num(a / 1e7, 2, 'INR') + ' Cr';
+    if (a >= 1e5) return s + p + num(a / 1e5, 2) + ' L';
+    return s + p + num(a, 0, 'INR');
+  }
+  for (const [n, u] of [[1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']]) if (a >= n) return s + p + num(a / n, 2) + u;
+  return s + p + num(a, 0);
+}
+const DF = {};
+function fdate(t, tz, opts) {
+  const k = tz + JSON.stringify(opts);
+  try { DF[k] = DF[k] || new Intl.DateTimeFormat('en-IN', Object.assign({ timeZone: tz || undefined }, opts)); }
+  catch (e) { DF[k] = new Intl.DateTimeFormat('en-IN', opts); }
+  return DF[k].format(new Date(t * 1000));
+}
+function ago(t) {
+  const s = Date.now() / 1000 - t;
+  if (s < 3600) return Math.max(1, Math.round(s / 60)) + 'm ago';
+  if (s < 86400) return Math.round(s / 3600) + 'h ago';
+  return Math.round(s / 86400) + 'd ago';
+}
+
+/* ================= api ================= */
+async function api(path, tries = 2) {
+  let last;
+  for (let i = 0; i < tries; i++) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 15000);
+    try {
+      const r = await fetch(API() + path, { signal: ctl.signal });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok) return j;
+      last = new Error(j.error || 'HTTP ' + r.status);
+      if (r.status < 500) break;
+    } catch (e) { last = e.name === 'AbortError' ? new Error('timed out') : e; }
+    finally { clearTimeout(timer); }
+    await new Promise(r => setTimeout(r, 600));
+  }
+  throw last;
+}
+
+async function fetchQuotes(syms) {
+  syms = [...new Set(syms)].filter(Boolean);
+  if (!syms.length) return;
+  const chunks = [];
+  for (let i = 0; i < syms.length; i += 15) chunks.push(syms.slice(i, i + 15));
+  const res = await Promise.allSettled(chunks.map(c => api('/api/quotes?s=' + encodeURIComponent(c.join(',')))));
+  let ok = 0;
+  for (const r of res) {
+    if (r.status !== 'fulfilled') continue;
+    for (const q of r.value.quotes || []) { S.q[q.symbol] = q; delete S.err[q.symbol]; ok++; }
+    for (const [s, m] of Object.entries(r.value.errors || {})) S.err[s] = m;
+  }
+  if (!ok && res.every(r => r.status === 'rejected')) throw res[0].reason;
+  S.updated = Date.now();
+  const keys = Object.keys(S.q);
+  if (keys.length > 400) for (const k of keys.slice(0, keys.length - 400)) if (!inWatch(k)) delete S.q[k];
+  LS.set('mp.q', S.q); LS.set('mp.upd', S.updated);
+}
+
+/* ================= views ================= */
+function symbolsFor(tabId) {
+  const t = TABS.find(x => x.id === tabId);
+  if (tabId === 'watch') return S.watch.map(w => w.s);
+  const out = t.groups.flatMap(g => g[1]);
+  return tabId === 'gold' ? [...new Set([...GOLD_CORE, ...out])] : out;
+}
+
+function renderTabs() {
+  $('#tabs').innerHTML = TABS.map(t =>
+    `<button class="tab${t.id === S.tab ? ' on' : ''}" data-tab="${t.id}">${t.label}${t.id === 'watch' ? ` <span class="cnt">${S.watch.length}</span>` : ''}</button>`).join('');
+}
+
+function spark(q) {
+  const a = q.spark || [];
+  if (a.length < 2) return '';
+  const W = 88, H = 30;
+  let mn = Math.min(...a), mx = Math.max(...a);
+  if (q.prev != null) { mn = Math.min(mn, q.prev); mx = Math.max(mx, q.prev); }
+  const rg = mx - mn || 1;
+  const pts = a.map((v, i) => (i * W / (a.length - 1)).toFixed(1) + ',' + (H - 2 - (v - mn) / rg * (H - 4)).toFixed(1)).join(' ');
+  const by = q.prev != null ? (H - 2 - (q.prev - mn) / rg * (H - 4)).toFixed(1) : null;
+  const col = (q.change ?? 0) >= 0 ? 'var(--up)' : 'var(--down)';
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${by ? `<line x1="0" x2="${W}" y1="${by}" y2="${by}" style="stroke:var(--line)" stroke-dasharray="2 3"/>` : ''}<polyline points="${pts}" fill="none" style="stroke:${col}" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+}
+
+function rowHTML(s, extra = '') {
+  const q = S.q[s], on = inWatch(s);
+  const pxv = q ? money(q.price, q.currency, q.type)
+    : S.err[s] ? `<span class="muted" title="${esc(S.err[s])}">n/a</span>` : '<span class="skel"></span>';
+  const chv = q && q.change != null ? `${sign(q.change)}${num(Math.abs(q.change), dec(q.price), q.currency)}<small>${sign(q.pct)}${num(Math.abs(q.pct), 2)}%</small>` : '';
+  return `<div class="row" data-open="${esc(s)}">
+<button class="star${on ? ' on' : ''}" data-star="${esc(s)}" aria-label="${on ? 'Remove from' : 'Add to'} watchlist">${on ? '★' : '☆'}</button>
+<div class="nm"><b>${esc(nameOf(s))}</b><small>${esc(s)}${q?.exchange ? ' · ' + esc(q.exchange) : ''}${q?.state === 'OPEN' ? ' <i class="live" title="Market open">●</i>' : ''}</small>${extra}</div>
+<div class="sp">${q ? spark(q) : ''}</div><div class="px">${pxv}</div><div class="ch ${q ? cls(q.change) : ''}">${chv}</div></div>`;
+}
+const HEAD = '<div class="row head"><span></span><span>Name</span><span class="sp">Today</span><span class="px">Price</span><span class="ch">Change</span></div>';
+const listHTML = syms => `<div class="list">${HEAD}${syms.map(s => rowHTML(s)).join('')}</div>`;
+
+function holdLine(w) {
+  const q = S.q[w.s];
+  if (!w.qty || !q) return '';
+  const val = w.qty * q.price, day = w.qty * (q.change || 0);
+  let s = `Qty ${num(w.qty, w.qty % 1 ? 2 : 0)} · Value ${money(val, q.currency)} · Today <span class="${cls(day)}">${sign(day)}${money(Math.abs(day), q.currency)}</span>`;
+  if (w.avg) { const pl = w.qty * (q.price - w.avg); s += ` · P&amp;L <span class="${cls(pl)}">${sign(pl)}${money(Math.abs(pl), q.currency)} (${sign(pl)}${num(Math.abs((q.price - w.avg) / w.avg * 100), 2)}%)</span>`; }
+  return `<div class="hold">${s}</div>`;
+}
+
+function watchView() {
+  const tools = `<div class="toolbar"><select id="sort" class="btn" aria-label="Sort">
+${[['mine', 'My order'], ['name', 'Name A–Z'], ['gain', 'Top gainers'], ['loss', 'Top losers'], ['value', 'Holding value']].map(o => `<option value="${o[0]}"${S.sort === o[0] ? ' selected' : ''}>${o[1]}</option>`).join('')}
+</select><span class="grow"></span><button class="btn sm" id="export">⇩ Backup</button><button class="btn sm" id="import">⇧ Restore</button></div>`;
+  if (!S.watch.length) return tools + '<div class="empty">Your watchlist is empty.<br>Search above, or tap ☆ on anything in the other tabs to save it here.<br>Open a saved stock to add your quantity &amp; buy price and track its value every day.</div>';
+  // portfolio summary per currency
+  const tot = {};
+  for (const w of S.watch) {
+    const q = S.q[w.s];
+    if (!w.qty || !q || q.price == null) continue;
+    const t = tot[q.currency] = tot[q.currency] || { val: 0, day: 0, pl: 0, cost: 0 };
+    t.val += w.qty * q.price; t.day += w.qty * (q.change || 0);
+    if (w.avg) { t.pl += w.qty * (q.price - w.avg); t.cost += w.qty * w.avg; }
+  }
+  let sum = '';
+  for (const [cur, t] of Object.entries(tot)) {
+    sum += `<div class="card" style="cursor:default"><small>Holdings value (${esc(cur)})</small><b>${money(t.val, cur)}</b><span class="${cls(t.day)}">Today ${sign(t.day)}${money(Math.abs(t.day), cur)}</span></div>`;
+    if (t.cost) sum += `<div class="card" style="cursor:default"><small>Total P&amp;L (${esc(cur)})</small><b class="${cls(t.pl)}">${sign(t.pl)}${money(Math.abs(t.pl), cur)}</b><span class="${cls(t.pl)}">${sign(t.pl)}${num(Math.abs(t.pl / t.cost * 100), 2)}% on ${money(t.cost, cur)}</span></div>`;
+  }
+  const list = [...S.watch];
+  const pct = s => S.q[s]?.pct ?? null;
+  if (S.sort === 'name') list.sort((a, b) => nameOf(a.s).localeCompare(nameOf(b.s)));
+  if (S.sort === 'gain') list.sort((a, b) => (pct(b.s) ?? -1e9) - (pct(a.s) ?? -1e9));
+  if (S.sort === 'loss') list.sort((a, b) => (pct(a.s) ?? 1e9) - (pct(b.s) ?? 1e9));
+  if (S.sort === 'value') list.sort((a, b) => (b.qty || 0) * (S.q[b.s]?.price || 0) - (a.qty || 0) * (S.q[a.s]?.price || 0));
+  return (sum ? `<div class="sumcard">${sum}</div>` : '') + tools + `<div class="list">${HEAD}${list.map(w => rowHTML(w.s, holdLine(w))).join('')}</div>`;
+}
+
+/* ---- Gold tab: India retail rates from GoodReturns (via worker), spot-based estimate as fallback ---- */
+function goldView() {
+  const m = S.metals, g = m?.gold, sv = m?.silver;
+  if (!g && !sv) {
+    const msg = S.metalsErr ? `India jeweller rates unavailable right now (${esc(S.metalsErr)}), so this is an estimate from international spot.` : 'Loading India jeweller rates…';
+    return `<p class="note">${msg}</p>` + estimateView();
+  }
+  const city = S.set.city || '';
+  const gc = city && g?.cities?.find(c => c.city === city);
+  const sc = city && sv?.cities?.find(c => c.city === city);
+  const pct = (v, d) => (v && d != null && v - d ? d / (v - d) * 100 : null);
+  const delta = (d, v) => (d == null ? '<span class="muted">—</span>' : `<span class="${cls(d)}">${d ? sign(d) + '₹' + num(Math.abs(d), 0, 'INR') + ' (' + sign(d) + num(Math.abs(pct(v, d)), 2) + '%)' : 'No change'} vs yesterday</span>`);
+  let cards = '';
+  if (g) {
+    const p = g.perGram;
+    const v24 = gc ? gc.k24 : p.k24.v, v22 = gc ? gc.k22 : p.k22.v, v18 = gc ? gc.k18 : p.k18.v;
+    const hist = (g.history || []).slice().reverse().map(h => h.k24);
+    const sp = hist.length > 1 ? spark({ spark: hist, prev: null, change: hist[hist.length - 1] - hist[0] }) : '';
+    cards += `<div class="card" style="cursor:default"><small>Gold 24K (999) · per 10 g</small><b class="gold">₹${num(v24 * 10, 0, 'INR')}</b>${delta(p.k24.d == null ? null : p.k24.d * 10, v24 * 10)}${sp ? `<div style="margin-top:6px">${sp}<small>10-day trend</small></div>` : ''}</div>`;
+    if (v22) cards += `<div class="card" style="cursor:default"><small>Gold 22K (916) · per 10 g</small><b class="gold">₹${num(v22 * 10, 0, 'INR')}</b>${delta(p.k22.d == null ? null : p.k22.d * 10, v22 * 10)}</div>`;
+    if (v18) cards += `<div class="card" style="cursor:default"><small>Gold 18K (750) · per 10 g</small><b class="gold">₹${num(v18 * 10, 0, 'INR')}</b>${delta(p.k18.d == null ? null : p.k18.d * 10, v18 * 10)}</div>`;
+    cards += `<div class="card" style="cursor:default"><small>Gold 24K · per 1 g</small><b class="gold">₹${num(v24, 0, 'INR')}</b>${delta(p.k24.d, v24)}</div>`;
+  }
+  if (sv) {
+    const kg = sc ? sc.kg : sv.perKg.v;
+    cards += `<div class="card" style="cursor:default"><small>Silver · per 1 kg</small><b>₹${num(kg, 0, 'INR')}</b>${delta(sv.perKg.d, kg)}</div>`;
+    cards += `<div class="card" style="cursor:default"><small>Silver · per 10 g</small><b>₹${num(kg / 100, 0, 'INR')}</b>${delta(sv.perKg.d == null ? null : sv.perKg.d / 100, kg / 100)}</div>`;
+  }
+  const cityNames = [...new Set([...(g?.cities || []).map(c => c.city), ...(sv?.cities || []).map(c => c.city)])];
+  const citySel = cityNames.length ? `<select id="city" class="btn sm" aria-label="City">${['', ...cityNames].map(c => `<option value="${esc(c)}"${c === city ? ' selected' : ''}>${c ? esc(c) : 'India (average)'}</option>`).join('')}</select>` : '';
+  let h = `<div class="toolbar"><div class="sec-title" style="margin:0">Gold &amp; silver rate today${g?.date ? ' · ' + esc(g.date) : ''}</div><span class="grow"></span>${citySel}</div>
+<div class="cards">${cards}</div>
+<p class="note">Source: <a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">GoodReturns.in</a> (indicative jeweller rates, excluding GST, TCS &amp; making charges). Updated ${m.fetched ? new Date(m.fetched).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}.${m.goldError ? ' Gold: ' + esc(m.goldError) + '.' : ''}${m.silverError ? ' Silver: ' + esc(m.silverError) + '.' : ''}</p>`;
+  // 10-day trend
+  const gh = g?.history || [], shMap = Object.fromEntries((sv?.history || []).map(x => [x.date, x]));
+  if (gh.length) {
+    const dc = (d, dp = 0) => (d == null ? '' : ` <small class="${cls(d)}">${d ? sign(d) + num(Math.abs(d), dp, 'INR') : '0'}</small>`);
+    h += `<div class="sec-title">Last 10 days</div><div class="hist" style="max-height:none"><table><thead><tr><th>Date</th><th>24K / 10 g</th><th>22K / 10 g</th>${sv ? '<th>Silver / kg</th>' : ''}</tr></thead><tbody>${
+      gh.map(x => { const s = shMap[x.date]; return `<tr><td>${esc(x.date)}</td><td>₹${num(x.k24 * 10, 0, 'INR')}${dc(x.k24d == null ? null : x.k24d * 10)}</td><td>${x.k22 ? '₹' + num(x.k22 * 10, 0, 'INR') + dc(x.k22d == null ? null : x.k22d * 10) : '—'}</td>${sv ? `<td>${s ? '₹' + num(s.kg, 0, 'INR') + dc(s.d) : '—'}</td>` : ''}</tr>`; }).join('')}</tbody></table></div>`;
+  }
+  // city table
+  if (cityNames.length) {
+    const sMap = Object.fromEntries((sv?.cities || []).map(c => [c.city, c.kg]));
+    const gMap = Object.fromEntries((g?.cities || []).map(c => [c.city, c]));
+    h += `<div class="sec-title">City-wise rates</div><div class="hist"><table><thead><tr><th>City</th><th>24K / 10 g</th><th>22K / 10 g</th><th>18K / 10 g</th><th>Silver / kg</th></tr></thead><tbody>${
+      cityNames.map(c => { const x = gMap[c]; const r = v => (v ? '₹' + num(v * 10, 0, 'INR') : '—'); return `<tr${c === city ? ' style="font-weight:700"' : ''}><td>${esc(c)}</td><td>${r(x?.k24)}</td><td>${r(x?.k22)}</td><td>${r(x?.k18)}</td><td>${sMap[c] ? '₹' + num(sMap[c], 0, 'INR') : '—'}</td></tr>`; }).join('')}</tbody></table></div>`;
+  }
+  // countries (useful for Gulf / NRI comparison)
+  if (g?.countries?.length) {
+    h += `<div class="sec-title">Other countries · 24K per 1 g</div><div class="hist"><table><thead><tr><th>Country</th><th>Local price</th><th>In ₹</th><th>vs India</th></tr></thead><tbody>${
+      g.countries.map(c => { const diff = c.inr24 && g.perGram.k24.v ? (c.inr24 - g.perGram.k24.v) / g.perGram.k24.v * 100 : null; return `<tr><td>${esc(c.country)}</td><td>${esc(c.cur)} ${num(c.k24, 2)}</td><td>${c.inr24 ? '₹' + num(c.inr24, 0, 'INR') : '—'}</td><td class="${cls(diff)}">${diff == null ? '—' : sign(diff) + num(Math.abs(diff), 1) + '%'}</td></tr>`; }).join('')}</tbody></table></div>`;
+  }
+  return h;
+}
+
+function estimateView() {
+  const g = S.q['GC=F'], si = S.q['SI=F'], fx = S.q['USDINR=X'];
+  const f = (1 + (Number(S.set.duty) || 0) / 100) * (S.set.gst ? 1.03 : 1);
+  const comb = (a, b) => (a?.pct == null || b?.pct == null ? null : ((1 + a.pct / 100) * (1 + b.pct / 100) - 1) * 100);
+  let cards = '';
+  if (g && fx) {
+    const pg = g.price * fx.price / OZ * f, gp = comb(g, fx);
+    for (const [lbl, unit, v] of [['Gold 24K (999)', 'per 10 g', pg * 10], ['Gold 22K (916)', 'per 10 g', pg * 10 * 0.916], ['Gold 18K (750)', 'per 10 g', pg * 10 * 0.75], ['Gold 24K', 'per 1 g', pg]])
+      cards += `<div class="card" data-open="GC=F"><small>${lbl} · ${unit}</small><b class="gold">₹${num(v, 0, 'INR')}</b><span class="${cls(gp)}">${gp == null ? '' : sign(gp) + num(Math.abs(gp), 2) + '% today'}</span></div>`;
+  }
+  if (si && fx) {
+    const ps = si.price * fx.price / OZ * f, sp = comb(si, fx);
+    for (const [lbl, unit, v] of [['Silver (999)', 'per 1 kg', ps * 1000], ['Silver (999)', 'per 10 g', ps * 10]])
+      cards += `<div class="card" data-open="SI=F"><small>${lbl} · ${unit}</small><b>₹${num(v, 0, 'INR')}</b><span class="${cls(sp)}">${sp == null ? '' : sign(sp) + num(Math.abs(sp), 2) + '% today'}</span></div>`;
+  }
+  if (!cards) cards = '<div class="card"><span class="skel"></span></div>'.repeat(4);
+  return `<div class="sec-title">India rate (estimated)</div><div class="cards">${cards}</div>
+<p class="note">International spot × USD/INR${fx ? ` (₹${num(fx.price, 2, 'INR')})` : ''} + import duty <input id="duty" type="number" min="0" max="30" step="0.5" value="${esc(S.set.duty)}" aria-label="Import duty %">%
+<label><input id="gst" type="checkbox"${S.set.gst ? ' checked' : ''}> + 3% GST</label>. Jeweller, MCX &amp; city rates differ; making charges not included.</p>`;
+}
+
+function renderView(force) {
+  const ae = document.activeElement;
+  if (!force && ae && ae.closest && ae.closest('#view') && /INPUT|SELECT/.test(ae.tagName)) return; // don't clobber typing
+  if (!API() && !isWorkerHost) { $('#view').innerHTML = setupHTML(); renderUpd(); return; }
+  const t = TABS.find(x => x.id === S.tab);
+  let h = '';
+  if (t.id === 'watch') h = watchView();
+  else {
+    if (t.id === 'gold') h += goldView();
+    h += t.groups.map(([title, syms]) => `<div class="sec-title">${esc(title)}</div>${listHTML(syms)}`).join('');
+  }
+  $('#view').innerHTML = h;
+  renderUpd();
+}
+function renderUpd() {
+  $('#upd').textContent = S.updated ? 'Updated ' + new Date(S.updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+}
+
+/* ================= first-run setup (GitHub Pages needs the data worker URL) ================= */
+let isWorkerHost = false;
+function setupHTML() {
+  return `<div class="setup"><h2 style="margin-top:0">Connect your data server</h2>
+<p>This app gets live prices through your free Cloudflare Worker. Paste its URL once (it's saved on this device).</p>
+<input id="apiUrl" type="url" placeholder="https://market-pulse.yourname.workers.dev" value="${esc(LS.get('mp.api', ''))}">
+<button class="btn pri" id="apiSave">Connect</button> <span id="apiMsg" class="muted"></span>
+<p class="muted" style="font-size:13px">Tip: set it permanently for everyone by editing <code>config.js</code> in the repo.</p></div>`;
+}
+async function saveApi(url) {
+  url = (url || '').trim().replace(/\/+$/, '');
+  if (!/^https:\/\/[^\s/]+/.test(url)) return 'Enter a full https:// URL';
+  try {
+    const r = await fetch(url + '/api/health'); const j = await r.json();
+    if (!j.ok) throw 0;
+  } catch (e) { return 'Could not reach ' + url + '/api/health'; }
+  LS.set('mp.api', url);
+  return '';
+}
+
+/* ================= refresh loop ================= */
+let busy = false;
+async function refresh() {
+  if (busy || (!API() && !isWorkerHost)) return;
+  busy = true; $('#refresh').classList.add('spin');
+  const syms = new Set(symbolsFor(S.tab));
+  if (S.detail) syms.add(S.detail.s);
+  try { await Promise.all([fetchQuotes([...syms]), S.tab === 'gold' ? loadMetals() : null]); banner(''); }
+  catch (e) { banner('Could not refresh prices (' + e.message + '). Showing last saved values — will retry automatically.'); }
+  finally {
+    busy = false; $('#refresh').classList.remove('spin');
+    renderView(); renderTabs();
+    if (S.detail) renderDetailHead();
+  }
+}
+function banner(msg) { const b = $('#banner'); b.textContent = msg; b.hidden = !msg; }
+
+/* ================= detail sheet ================= */
+function openDetail(s, push = true) {
+  $('#results').hidden = true;
+  S.detail = { s, range: '1d', hist: '3mo', histData: null };
+  if (push) history.pushState({ d: s }, '', '#' + encodeURIComponent(s));
+  $('#modal').hidden = false; document.body.classList.add('noscroll');
+  $('#modal').scrollTop = 0;
+  const d = S.detail;
+  $('#sheet').innerHTML = `<div class="dtop"><div id="dhead" class="dhead"></div><button class="ib x" data-close aria-label="Close">✕</button></div>
+<div class="ranges" id="ranges">${RANGES.map(r => `<button data-range="${r[0]}"${r[0] === d.range ? ' class="on"' : ''}>${r[1]}</button>`).join('')}<span class="pchg" id="pchg"></span></div>
+<div id="chart" class="chart"><div class="loading">Loading chart…</div></div>
+<div id="stats" class="stats"></div>
+<div id="hold"></div>
+<div id="fund" class="fund"></div>
+<section><div class="sechead"><h3>Daily price history</h3><div>
+<select id="histRange" class="btn sm" aria-label="History period">${[['1mo', '1 month'], ['3mo', '3 months'], ['6mo', '6 months'], ['1y', '1 year'], ['5y', '5 years']].map(o => `<option value="${o[0]}"${o[0] === d.hist ? ' selected' : ''}>${o[1]}</option>`).join('')}</select>
+<button class="btn sm" id="csv">⇩ CSV</button></div></div><div id="hist" class="hist"><div class="loading">Loading…</div></div></section>
+<section><h3 style="margin-bottom:8px">News</h3><div id="news" class="news"><div class="loading">Loading…</div></div></section>`;
+  renderDetailHead(); renderHold();
+  loadChart(); loadHist(); loadNews(); loadFund();
+  if (!S.q[s]) fetchQuotes([s]).then(() => { if (S.detail === d) { renderDetailHead(); loadFund(); } }).catch(e => { S.err[s] = e.message; if (S.detail === d) renderDetailHead(); });
+}
+function closeDetail(fromPop) {
+  if (!S.detail) return;
+  S.detail = null; $('#modal').hidden = true; $('#sheet').innerHTML = ''; document.body.classList.remove('noscroll');
+  if (!fromPop) { if (history.state && history.state.d) history.back(); else history.replaceState(null, '', location.pathname + location.search); }
+}
+
+function renderDetailHead() {
+  const d = S.detail; if (!d) return;
+  const s = d.s, q = S.q[s], on = inWatch(s);
+  $('#dhead').innerHTML = `<h2>${esc(nameOf(s))}</h2>
+<div class="sub">${esc(s)}${q ? ' · ' + esc(q.exchange) + ' · ' + esc(q.currency) : ''}</div>
+<div class="big">${q ? money(q.price, q.currency, q.type) : S.err[s] ? '<span class="muted" style="font-size:16px">' + esc(S.err[s]) + '</span>' : '<span class="skel" style="width:140px;height:26px"></span>'}
+${q && q.change != null ? `<span class="ch ${cls(q.change)}">${sign(q.change)}${num(Math.abs(q.change), dec(q.price), q.currency)} (${sign(q.pct)}${num(Math.abs(q.pct), 2)}%)</span>` : ''}</div>
+<div class="dmeta">${q ? `<span class="pill${q.state === 'OPEN' ? ' open' : ''}">${q.state === 'OPEN' ? '● LIVE' : 'CLOSED'}</span>${q.time ? '<span>as of ' + esc(fdate(q.time, q.tz, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })) + '</span>' : ''}` : ''}
+<button class="btn sm" data-star="${esc(s)}">${on ? '★ In watchlist' : '☆ Add to watchlist'}</button></div>`;
+  if (!q) { $('#stats').innerHTML = ''; return; }
+  const rb = (lo, hi, v) => (lo != null && hi != null && hi > lo ? `<div class="rbar"><i style="left:${Math.min(100, Math.max(0, (v - lo) / (hi - lo) * 100)).toFixed(1)}%"></i></div>` : '');
+  const f = d.fund || {};
+  const cells = [
+    ['Previous close', money(q.prev, q.currency, q.type)],
+    ['Day range', `${money(q.dayLow, q.currency, q.type)} – ${money(q.dayHigh, q.currency, q.type)}${rb(q.dayLow, q.dayHigh, q.price)}`],
+    ['52-week range', `${money(q.low52, q.currency, q.type)} – ${money(q.high52, q.currency, q.type)}${rb(q.low52, q.high52, q.price)}`],
+  ];
+  if (q.volume) cells.push(['Volume', big(q.volume, q.currency, true)]);
+  if (f.marketCap) cells.push(['Market cap', big(f.marketCap, q.currency)]);
+  if (f.trailingPE) cells.push(['P/E (TTM)', num(f.trailingPE, 2)]);
+  if (q.high52) cells.push(['From 52W high', `<span class="${cls(q.price - q.high52)}">${sign(q.price - q.high52)}${num(Math.abs((q.price - q.high52) / q.high52 * 100), 2)}%</span>`]);
+  $('#stats').innerHTML = cells.map(c => `<div class="stat"><small>${c[0]}</small><b>${c[1]}</b></div>`).join('');
+  updHoldCalc();
+}
+
+function renderHold() {
+  const d = S.detail; if (!d) return;
+  const w = wEntry(d.s);
+  $('#hold').innerHTML = w ? `<div class="holdbox"><b style="flex-basis:100%">My holding <span class="muted" style="font-weight:400;font-size:12px">(optional — tracks value &amp; P&amp;L daily, saved on this device)</span></b>
+<label>Quantity<input id="hqty" type="number" inputmode="decimal" min="0" step="any" value="${w.qty || ''}" placeholder="0"></label>
+<label>Avg buy price<input id="havg" type="number" inputmode="decimal" min="0" step="any" value="${w.avg || ''}" placeholder="0.00"></label>
+<button class="btn pri" id="hsave">Save</button><div class="calc" id="holdcalc"></div></div>` : '';
+  updHoldCalc();
+}
+function updHoldCalc() {
+  const el = $('#holdcalc'); if (!el || !S.detail) return;
+  const w = wEntry(S.detail.s);
+  el.innerHTML = w ? holdLine(w).replace('class="hold"', '') : '';
+}
+
+async function loadChart() {
+  const d = S.detail, r = d.range, el = $('#chart');
+  $('#pchg').textContent = '';
+  el.innerHTML = '<div class="loading">Loading chart…</div>';
+  try {
+    const j = await api(`/api/chart?s=${encodeURIComponent(d.s)}&range=${r}`);
+    if (S.detail !== d || d.range !== r) return;
+    drawChart(el, j, r);
+  } catch (e) {
+    if (S.detail === d && d.range === r) el.innerHTML = `<div class="loading">Chart unavailable (${esc(e.message)}). <button class="btn sm" data-retry="chart">Retry</button></div>`;
+  }
+}
+
+function drawChart(el, j, r) {
+  const pts = j.points || [];
+  if (pts.length < 2) { el.innerHTML = '<div class="loading">Not enough data for this period.</div>'; return; }
+  const W = Math.max(300, Math.round(el.clientWidth)), H = 260, L = 8, R = 64, T = 14, B = 26, iw = W - L - R, ih = H - T - B, n = pts.length;
+  const cs = pts.map(p => p[4]);
+  const intraday = r === '1d';
+  const base = intraday && j.prev != null ? j.prev : cs[0];
+  let mn = Math.min(...cs), mx = Math.max(...cs);
+  if (intraday && j.prev != null) { mn = Math.min(mn, j.prev); mx = Math.max(mx, j.prev); }
+  const pad = (mx - mn) * 0.08 || Math.abs(mx) * 0.01 || 1; mn -= pad; mx += pad;
+  const X = i => L + i * iw / (n - 1), Y = v => T + (mx - v) / (mx - mn) * ih;
+  const last = cs[n - 1], up = last >= base, col = up ? 'var(--up)' : 'var(--down)';
+  let line = '';
+  for (let i = 0; i < n; i++) line += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(cs[i]).toFixed(1);
+  const area = line + `L${X(n - 1).toFixed(1)} ${T + ih}L${L} ${T + ih}Z`;
+  let g = '';
+  for (let k = 0; k <= 4; k++) {
+    const v = mn + (mx - mn) * k / 4, y = Y(v).toFixed(1);
+    g += `<line x1="${L}" x2="${L + iw}" y1="${y}" y2="${y}" class="grid"/><text x="${W - 6}" y="${(+y + 4).toFixed(1)}" text-anchor="end" class="axis">${num(v, dec(v), j.currency)}</text>`;
+  }
+  const xf = r === '1d' ? { hour: '2-digit', minute: '2-digit', hour12: false } : r === '5d' || r === '1mo' || r === '6mo' || r === 'ytd' ? { day: 'numeric', month: 'short' } : r === '1y' ? { month: 'short', year: '2-digit' } : { month: 'short', year: 'numeric' };
+  const tf = intraday ? { hour: '2-digit', minute: '2-digit' } : r === '5d' ? { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' } : { day: 'numeric', month: 'short', year: 'numeric' };
+  const nx = Math.min(W < 420 ? 3 : 5, n);
+  for (let k = 0; k < nx; k++) {
+    const i = Math.round(k * (n - 1) / (nx - 1));
+    g += `<text x="${X(i).toFixed(1)}" y="${H - 7}" text-anchor="${k === 0 ? 'start' : k === nx - 1 ? 'end' : 'middle'}" class="axis">${esc(fdate(pts[i][0], j.tz, xf))}</text>`;
+  }
+  if (intraday && j.prev != null) g += `<line x1="${L}" x2="${L + iw}" y1="${Y(j.prev).toFixed(1)}" y2="${Y(j.prev).toFixed(1)}" style="stroke:var(--muted)" stroke-dasharray="4 4" opacity=".7"/>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Price chart">
+<defs><linearGradient id="gf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${col};stop-opacity:.28"/><stop offset="1" style="stop-color:${col};stop-opacity:0"/></linearGradient></defs>
+${g}<path d="${area}" fill="url(#gf)"/><path d="${line}" fill="none" style="stroke:${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line id="cx" class="cross" y1="${T}" y2="${T + ih}" visibility="hidden"/><circle id="cd" r="4.5" style="fill:${col};stroke:var(--card)" stroke-width="2" visibility="hidden"/>
+<rect x="${L}" y="0" width="${iw}" height="${H}" fill="transparent" id="hit"/></svg><div class="tip" hidden></div>`;
+  const ch = (last - base) / base * 100;
+  const pc = $('#pchg');
+  pc.className = 'pchg ' + cls(ch);
+  pc.textContent = `${sign(ch)}${num(Math.abs(ch), 2)}% (${RANGES.find(x => x[0] === r)[1]})`;
+  const svg = el.querySelector('svg'), tip = el.querySelector('.tip'), cx = svg.querySelector('#cx'), cd = svg.querySelector('#cd');
+  const move = e => {
+    const rect = svg.getBoundingClientRect(), sc = W / rect.width;
+    const px = (e.clientX - rect.left) * sc;
+    const i = Math.max(0, Math.min(n - 1, Math.round((px - L) / iw * (n - 1))));
+    const x = X(i), y = Y(cs[i]);
+    cx.setAttribute('x1', x); cx.setAttribute('x2', x); cx.setAttribute('visibility', 'visible');
+    cd.setAttribute('cx', x); cd.setAttribute('cy', y); cd.setAttribute('visibility', 'visible');
+    const c = (cs[i] - base) / base * 100;
+    tip.innerHTML = `${esc(fdate(pts[i][0], j.tz, tf))} · <b>${num(cs[i], dec(cs[i]), j.currency)}</b> <span style="opacity:.8">${sign(c)}${num(Math.abs(c), 2)}%</span>`;
+    tip.hidden = false;
+    const tl = x / sc, tw = tip.offsetWidth;
+    tip.style.left = Math.max(4, Math.min(rect.width - tw - 4, tl - tw / 2)) + 'px';
+  };
+  const leave = () => { tip.hidden = true; cx.setAttribute('visibility', 'hidden'); cd.setAttribute('visibility', 'hidden'); };
+  svg.addEventListener('pointermove', move);
+  svg.addEventListener('pointerdown', move);
+  svg.addEventListener('pointerleave', leave);
+}
+
+async function loadHist() {
+  const d = S.detail, r = d.hist, el = $('#hist');
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const j = await api(`/api/chart?s=${encodeURIComponent(d.s)}&range=${r}&i=1d`);
+    if (S.detail !== d || d.hist !== r) return;
+    const p = j.points || [];
+    d.histData = { cur: j.currency, tz: j.tz, rows: p.map((x, i) => ({ t: x[0], o: x[1], h: x[2], l: x[3], c: x[4], v: x[5], pc: i ? p[i - 1][4] : null })) };
+    if (!p.length) { el.innerHTML = '<div class="loading">No daily data.</div>'; return; }
+    const hasVol = p.some(x => x[5]);
+    const cur = j.currency;
+    el.innerHTML = `<table><thead><tr><th>Date</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Change</th>${hasVol ? '<th>Volume</th>' : ''}</tr></thead><tbody>${
+      d.histData.rows.slice().reverse().map(x => {
+        const c = x.pc ? (x.c - x.pc) / x.pc * 100 : null;
+        return `<tr><td>${esc(fdate(x.t, j.tz, { day: '2-digit', month: 'short', year: 'numeric', weekday: 'short' }))}</td><td>${num(x.o, dec(x.o), cur)}</td><td>${num(x.h, dec(x.h), cur)}</td><td>${num(x.l, dec(x.l), cur)}</td><td><b>${num(x.c, dec(x.c), cur)}</b></td><td class="${cls(c)}">${c == null ? '—' : sign(c) + num(Math.abs(c), 2) + '%'}</td>${hasVol ? `<td>${x.v ? big(x.v, cur, true) : '—'}</td>` : ''}</tr>`;
+      }).join('')}</tbody></table>`;
+  } catch (e) {
+    if (S.detail === d) el.innerHTML = `<div class="loading">History unavailable (${esc(e.message)}). <button class="btn sm" data-retry="hist">Retry</button></div>`;
+  }
+}
+
+function downloadCSV() {
+  const d = S.detail; if (!d || !d.histData) return;
+  const lines = ['Date,Open,High,Low,Close,Change %,Volume'];
+  for (const x of d.histData.rows) {
+    const c = x.pc ? ((x.c - x.pc) / x.pc * 100).toFixed(2) : '';
+    lines.push([fdate(x.t, d.histData.tz, { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'), x.o, x.h, x.l, x.c, c, x.v ?? ''].join(','));
+  }
+  saveFile(`${d.s}-daily-${d.hist}.csv`, lines.join('\n'), 'text/csv');
+}
+function saveFile(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name.replace(/[^\w.\-]+/g, '_');
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+async function loadNews() {
+  const d = S.detail, el = $('#news');
+  try {
+    // Yahoo news search matches company names, not exchange tickers.
+    const q = nameOf(d.s).replace(/\(.*?\)|→.*$/g, '').replace(/\b(limited|ltd\.?|inc\.?|corporation|corp\.?|plc|company|co\.)\s*$/i, '').trim() || d.s;
+    let j = await api('/api/news?q=' + encodeURIComponent(q));
+    const short = q.split(/\s+/)[0];
+    if (!(j.news || []).length && short !== q && short.length > 2) j = await api('/api/news?q=' + encodeURIComponent(short));
+    if (S.detail !== d) return;
+    el.innerHTML = (j.news || []).length ? j.news.map(n => `<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer"><div>${esc(n.title)}</div><small>${esc(n.publisher)}${n.time ? ' · ' + ago(n.time) : ''}</small></a>`).join('') : '<div class="loading">No recent news.</div>';
+  } catch (e) { if (S.detail === d) el.innerHTML = '<div class="loading">News unavailable right now.</div>'; }
+}
+
+const FUND = [
+  ['Valuation', [['marketCap', 'Market cap', 'big'], ['enterpriseValue', 'Enterprise value', 'big'], ['trailingPE', 'P/E (TTM)', 'x'], ['forwardPE', 'Forward P/E', 'x'], ['priceToBook', 'Price / Book', 'x'], ['priceToSalesTrailing12Months', 'Price / Sales', 'x'], ['enterpriseToEbitda', 'EV / EBITDA', 'x'], ['pegRatio', 'PEG ratio', 'x']]],
+  ['Per share & dividends', [['trailingEps', 'EPS (TTM)', 'price'], ['forwardEps', 'Forward EPS', 'price'], ['bookValue', 'Book value / share', 'price'], ['dividendRate', 'Dividend / share', 'price'], ['dividendYield', 'Dividend yield', 'pct'], ['payoutRatio', 'Payout ratio', 'pct'], ['exDividendDate', 'Ex-dividend date', 'date']]],
+  ['Financials', [['totalRevenue', 'Revenue (TTM)', 'big'], ['revenueGrowth', 'Revenue growth (YoY)', 'pct'], ['earningsGrowth', 'Earnings growth (YoY)', 'pct'], ['ebitda', 'EBITDA', 'big'], ['grossMargins', 'Gross margin', 'pct'], ['operatingMargins', 'Operating margin', 'pct'], ['profitMargins', 'Net margin', 'pct'], ['returnOnEquity', 'ROE', 'pct'], ['returnOnAssets', 'ROA', 'pct'], ['totalCash', 'Total cash', 'big'], ['totalDebt', 'Total debt', 'big'], ['debtToEquity', 'Debt / Equity (%)', 'x'], ['currentRatio', 'Current ratio', 'x'], ['freeCashflow', 'Free cash flow', 'big']]],
+  ['Trading', [['beta', 'Beta', 'x'], ['fiftyDayAverage', '50-day average', 'price'], ['twoHundredDayAverage', '200-day average', 'price'], ['averageVolume', 'Avg volume (3M)', 'vol'], ['sharesOutstanding', 'Shares outstanding', 'vol'], ['heldPercentInsiders', 'Held by promoters/insiders', 'pct'], ['heldPercentInstitutions', 'Held by institutions', 'pct']]],
+  ['Analysts', [['recommendationKey', 'Consensus', 'txt'], ['numberOfAnalystOpinions', 'Analysts', 'int'], ['targetMeanPrice', 'Mean target', 'price'], ['targetHighPrice', 'High target', 'price'], ['targetLowPrice', 'Low target', 'price']]],
+];
+async function loadFund() {
+  const d = S.detail, el = $('#fund');
+  const q = S.q[d.s];
+  const eligible = q ? /EQUITY|ETF|MUTUALFUND/.test(q.type) : !/[\^=]|-[A-Z]{3}$/.test(d.s);
+  if (!eligible || d.fundLoading || d.fund) return;
+  d.fundLoading = true;
+  el.innerHTML = '<div class="loading">Loading fundamentals…</div>';
+  try {
+    const f = await api('/api/summary?s=' + encodeURIComponent(d.s));
+    if (S.detail !== d) return;
+    d.fund = f;
+    const cur = q?.currency || f.currency || 'INR';
+    const fmt = (v, t) => {
+      if (v == null || v === '') return null;
+      switch (t) {
+        case 'big': return big(v, cur);
+        case 'vol': return big(v, cur, true);
+        case 'pct': return num(v * 100, 2) + '%';
+        case 'x': return num(v, 2);
+        case 'int': return String(v);
+        case 'price': return money(v, cur);
+        case 'date': return typeof v === 'number' ? fdate(v, 'UTC', { day: 'numeric', month: 'short', year: 'numeric' }) : esc(v);
+        case 'txt': return esc(String(v).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
+      }
+    };
+    let h = '';
+    for (const [title, fields] of FUND) {
+      const cells = fields.map(([k, lbl, t]) => [lbl, fmt(f[k], t)]).filter(c => c[1] != null);
+      if (title === 'Analysts' && f.targetMeanPrice && q?.price) cells.push(['Upside to mean target', `<span class="${cls(f.targetMeanPrice - q.price)}">${sign(f.targetMeanPrice - q.price)}${num(Math.abs((f.targetMeanPrice - q.price) / q.price * 100), 2)}%</span>`]);
+      if (cells.length) h += `<h4>${title}</h4><div class="stats" style="margin-top:0">${cells.map(c => `<div class="stat"><small>${c[0]}</small><b>${c[1]}</b></div>`).join('')}</div>`;
+    }
+    const meta = [f.sector, f.industry, f.fullTimeEmployees ? num(f.fullTimeEmployees, 0, cur) + ' employees' : '', [f.city, f.country].filter(Boolean).join(', ')].filter(Boolean).map(esc).join(' · ');
+    if (meta || f.longBusinessSummary) {
+      const site = /^https?:\/\//.test(f.website || '') ? ` · <a href="${esc(f.website)}" target="_blank" rel="noopener noreferrer">website</a>` : '';
+      const sum = f.longBusinessSummary || '';
+      h += `<h4>About</h4><div class="about">${meta}${site}${sum ? (sum.length > 320 ? `<p style="margin:8px 0 0">${esc(sum.slice(0, 320))}…</p><details><summary>Read more</summary><p>${esc(sum)}</p></details>` : `<p style="margin:8px 0 0">${esc(sum)}</p>`) : ''}</div>`;
+    }
+    if (h && f._partial) h += '<p class="note" style="margin-top:8px">Showing key figures only. Full fundamentals (dividends, analyst targets, profile) are temporarily unavailable from the data provider.</p>';
+    el.innerHTML = h;
+    renderDetailHead();
+  } catch (e) {
+    if (S.detail === d) el.innerHTML = `<div class="loading" style="padding:14px">Fundamentals unavailable right now. <button class="btn sm" data-retry="fund">Retry</button></div>`;
+  } finally { d.fundLoading = false; }
+}
+
+/* ================= watchlist ops ================= */
+function toggleWatch(s) {
+  const w = wEntry(s);
+  if (w) {
+    if (w.qty && !confirm(`Remove ${nameOf(s)} and its saved holding from your watchlist?`)) return;
+    S.watch = S.watch.filter(x => x.s !== s);
+  } else {
+    S.watch.push({ s, n: nameOf(s) });
+    if (!S.q[s]) fetchQuotes([s]).then(() => { renderView(); if (S.detail) renderDetailHead(); }).catch(() => {});
+  }
+  saveWatch(); renderTabs(); renderView(true);
+  if (S.detail) { renderDetailHead(); renderHold(); }
+  document.querySelectorAll(`#results [data-star="${CSS.escape(s)}"]`).forEach(b => { b.textContent = inWatch(s) ? '★' : '☆'; b.classList.toggle('on', inWatch(s)); });
+}
+function exportWatch() {
+  saveFile(`market-pulse-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: 'market-pulse', v: 1, watch: S.watch, settings: S.set }, null, 2), 'application/json');
+}
+async function importWatch(file) {
+  try {
+    const j = JSON.parse(await file.text());
+    const list = Array.isArray(j) ? j : j.watch;
+    if (!Array.isArray(list)) throw new Error('not a backup file');
+    let added = 0;
+    for (const x of list) {
+      const e = typeof x === 'string' ? { s: x } : x;
+      if (!e || typeof e.s !== 'string' || !/^[A-Za-z0-9.^=\-&_]{1,32}$/.test(e.s)) continue;
+      const cur = wEntry(e.s);
+      const clean = { s: e.s, n: typeof e.n === 'string' ? e.n.slice(0, 80) : undefined, qty: +e.qty || undefined, avg: +e.avg || undefined };
+      if (cur) Object.assign(cur, clean); else { S.watch.push(clean); added++; }
+    }
+    if (j.settings) Object.assign(S.set, { duty: +j.settings.duty || S.set.duty, gst: !!j.settings.gst });
+    saveWatch(); LS.set('mp.set', S.set); renderTabs(); renderView(true); refresh();
+    alert(`Restored. ${added} new item(s) added.`);
+  } catch (e) { alert('Could not restore: ' + e.message); }
+}
+
+/* ================= search ================= */
+let sTimer, sSeq = 0;
+function showResults(h) { const r = $('#results'); r.innerHTML = h; r.hidden = false; }
+async function doSearch(v) {
+  const id = ++sSeq;
+  showResults('<div class="ri muted">Searching…</div>');
+  try {
+    const j = await api('/api/search?q=' + encodeURIComponent(v), 1);
+    if (id !== sSeq) return;
+    const rs = j.results || [];
+    showResults(rs.length ? rs.map(r => {
+      if (!NAMES[r.symbol] && !S.q[r.symbol]) NAMES[r.symbol] = r.name;
+      const on = inWatch(r.symbol);
+      return `<div class="ri" data-open="${esc(r.symbol)}"><div><b>${esc(r.name)}</b><small>${esc(r.symbol)} · ${esc(r.exch)} · ${esc(r.type)}</small></div><button class="star${on ? ' on' : ''}" data-star="${esc(r.symbol)}" aria-label="Save">${on ? '★' : '☆'}</button></div>`;
+    }).join('') : '<div class="ri muted">No matches. Try the company name or NSE symbol (e.g. INFY).</div>');
+  } catch (e) { if (id === sSeq) showResults(`<div class="ri muted">Search failed: ${esc(e.message)}</div>`); }
+}
+
+/* ================= theme ================= */
+function applyTheme() {
+  const t = LS.get('mp.theme', 'auto');
+  if (t === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+  const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.querySelector('meta[name=theme-color]').content = dark ? '#0b0f17' : '#f4f6f9';
+  $('#theme').title = 'Theme: ' + t;
+}
+
+/* ================= events ================= */
+document.addEventListener('click', async e => {
+  const t = e.target;
+  const star = t.closest('[data-star]');
+  if (star) { e.stopPropagation(); toggleWatch(star.dataset.star); return; }
+  const tab = t.closest('[data-tab]');
+  if (tab) { S.tab = tab.dataset.tab; LS.set('mp.tab', S.tab); renderTabs(); renderView(true); window.scrollTo(0, 0); refresh(); return; }
+  if (t.closest('[data-close]') || t.id === 'modal') { closeDetail(); return; }
+  const rg = t.closest('[data-range]');
+  if (rg && S.detail) { S.detail.range = rg.dataset.range; document.querySelectorAll('#ranges [data-range]').forEach(b => b.classList.toggle('on', b === rg)); loadChart(); return; }
+  const rt = t.closest('[data-retry]');
+  if (rt && S.detail) { const k = rt.dataset.retry; if (k === 'chart') loadChart(); if (k === 'hist') loadHist(); if (k === 'fund') { S.detail.fund = null; loadFund(); } return; }
+  const op = t.closest('[data-open]');
+  if (op) { openDetail(op.dataset.open); return; }
+  switch (t.closest('button')?.id) {
+    case 'refresh': refresh(); break;
+    case 'theme': { const order = ['auto', 'dark', 'light']; LS.set('mp.theme', order[(order.indexOf(LS.get('mp.theme', 'auto')) + 1) % 3]); applyTheme(); break; }
+    case 'settings': { const v = prompt('Data server (Cloudflare Worker) URL:', API()); if (v != null) { if (!v.trim()) { LS.set('mp.api', ''); renderView(true); } else { const m = await saveApi(v); if (m) alert(m); else { renderView(true); refresh(); } } } break; }
+    case 'apiSave': { $('#apiMsg').textContent = 'Checking…'; const m = await saveApi($('#apiUrl').value); $('#apiMsg').textContent = m; if (!m) { renderView(true); refresh(); } break; }
+    case 'export': exportWatch(); break;
+    case 'import': $('#importFile').click(); break;
+    case 'csv': downloadCSV(); break;
+    case 'hsave': {
+      const w = wEntry(S.detail.s); if (!w) break;
+      const qty = parseFloat($('#hqty').value), avg = parseFloat($('#havg').value);
+      w.qty = qty > 0 ? qty : undefined; w.avg = avg > 0 ? avg : undefined;
+      saveWatch(); updHoldCalc(); renderView(true);
+      t.textContent = 'Saved ✓'; setTimeout(() => { if (t.isConnected) t.textContent = 'Save'; }, 1500);
+      break;
+    }
+  }
+  if (!t.closest('.search')) $('#results').hidden = true;
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'sort') { S.sort = t.value; LS.set('mp.sort', S.sort); renderView(true); }
+  if (t.id === 'duty') { S.set.duty = Math.max(0, Math.min(30, parseFloat(t.value) || 0)); LS.set('mp.set', S.set); t.blur(); renderView(true); }
+  if (t.id === 'city') { S.set.city = t.value; LS.set('mp.set', S.set); t.blur(); renderView(true); }
+  if (t.id === 'gst') { S.set.gst = t.checked; LS.set('mp.set', S.set); t.blur(); renderView(true); }
+  if (t.id === 'histRange' && S.detail) { S.detail.hist = t.value; t.blur(); loadHist(); }
+  if (t.id === 'importFile' && t.files[0]) { importWatch(t.files[0]); t.value = ''; }
+});
+$('#q').addEventListener('input', e => {
+  clearTimeout(sTimer);
+  const v = e.target.value.trim();
+  if (!v) { sSeq++; $('#results').hidden = true; return; }
+  sTimer = setTimeout(() => doSearch(v), 220);
+});
+$('#q').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { const f = $('#results [data-open]'); if (f) { openDetail(f.dataset.open); e.target.blur(); } }
+  if (e.key === 'Escape') { $('#results').hidden = true; e.target.blur(); }
+});
+$('#q').addEventListener('focus', () => { if ($('#q').value.trim() && $('#results').innerHTML) $('#results').hidden = false; });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && S.detail) closeDetail();
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); $('#q').focus(); }
+});
+window.addEventListener('popstate', () => {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (S.detail && S.detail.s !== h) closeDetail(true);
+  if (h && !S.detail) openDetail(h, false);
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - S.updated > 15000) refresh(); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', applyTheme);
+let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { if (S.detail) loadChart(); }, 300); });
+setInterval(() => { if (!document.hidden) refresh(); }, 30000);
+
+/* ================= boot ================= */
+(async function boot() {
+  const qt = new URLSearchParams(location.search).get('tab');
+  if (qt && TABS.some(t => t.id === qt)) S.tab = qt;
+  applyTheme(); renderTabs();
+  // Served by the worker itself? Then same-origin API works without any setup.
+  if (!API()) { try { const r = await fetch('api/health'); isWorkerHost = r.ok && (await r.json()).ok === true; } catch (e) {} }
+  renderView(true);
+  refresh();
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h && /^[A-Za-z0-9.^=\-&_]{1,32}$/.test(h)) openDetail(h, false);
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>

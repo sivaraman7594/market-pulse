@@ -1,0 +1,15 @@
+{
+  "name": "Market Pulse",
+  "short_name": "Markets",
+  "description": "Live stocks, indices, gold, silver, currency and crypto with your personal watchlist.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0f17",
+  "theme_color": "#0b0f17",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
